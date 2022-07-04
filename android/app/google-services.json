@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "84345915370",
+    "project_id": "just-chat-51502",
+    "storage_bucket": "just-chat-51502.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:84345915370:android:c86a767e40426fdd6b5493",
+        "android_client_info": {
+          "package_name": "com.kwejibo.just_chat.just_chat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "84345915370-00jt3utdivale1po61lckj8rvrv4lmp3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJnd1Jt88eyaIbzfnlEmgPsfJ4c71BgyA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "84345915370-00jt3utdivale1po61lckj8rvrv4lmp3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
