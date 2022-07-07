@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/rendering.dart';
 import 'package:just_chat/add_friend_constructor.dart';
 import 'package:just_chat/constants.dart';
 import 'package:just_chat/widgets/loading.dart';
@@ -248,9 +247,8 @@ class _HomePageState extends State<HomePage> {
                                           ),
                                           const SizedBox(height: 5),
                                           Text(
-                                            messageText.length > 20
-                                                ? '${messageText.substring(0, 20)}...'
-                                                : messageText,
+                                            getMessageText(
+                                                messageText, isMe, documentID),
                                             style: !isSeen && !isMe
                                                 ? const TextStyle(
                                                     fontSize: 16,
@@ -302,5 +300,17 @@ class _HomePageState extends State<HomePage> {
         ),
       ],
     );
+  }
+
+  String getMessageText(String messageText, bool isMe, String documentID) {
+    String message = messageText.length > 20
+        ? '${messageText.substring(0, 20)}...'
+        : messageText;
+
+    if (messageText.toString().startsWith(documentID)) {
+      message = 'Sent a photo';
+    }
+
+    return isMe ? 'You: $message' : message;
   }
 }

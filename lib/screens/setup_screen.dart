@@ -169,6 +169,7 @@ class _SetupScreenState extends State<SetupScreen> {
                                   .child('profile/${user?.uid}/${image.name}')
                                   .putFile(File(image.path));
 
+                              print(image.path);
                               firebaseFirestore
                                   .collection('users')
                                   .doc(user?.uid.toString())

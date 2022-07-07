@@ -16,7 +16,8 @@ FirebaseStorage firebaseStorage = FirebaseStorage.instance;
 FirebaseAuth auth = FirebaseAuth.instance;
 
 Map selectedImage = {};
-bool setOnce = false;
+bool isSelect = false;
+late int selectIndex;
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen(
@@ -34,7 +35,6 @@ class _ChatScreenState extends State<ChatScreen> {
   ScrollController scrollController = ScrollController();
   String text = '';
   bool isGallery = false;
-
   List listImagePath = [];
 
   @override
@@ -93,6 +93,10 @@ class _ChatScreenState extends State<ChatScreen> {
                       final sentBy = messages!.docs[i]['sentBy'];
                       final isSeen = messages!.docs[i]['isSeen'];
                       final isMe = id == sentBy;
+                      bool isText = true;
+                      if (messageText.toString().startsWith(documentID)) {
+                        isText = false;
+                      }
 
                       if (!isSeen && !isMe) {
                         firebaseFirestore
@@ -110,6 +114,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         sentAt: sentAt,
                         isMe: isMe,
                         isSeen: isSeen,
+                        isText: isText,
                       );
 
                       mBubble.add(messageWidget);
@@ -270,8 +275,16 @@ class _ChatScreenState extends State<ChatScreen> {
                                             setState(() {
                                               if (selectedImage[i]) {
                                                 selectedImage[i] = false;
+                                                isSelect = false;
                                               } else {
+                                                for (var j = 0; j < 1000; j++) {
+                                                  if (selectedImage[j]) {
+                                                    selectedImage[j] = false;
+                                                  }
+                                                }
                                                 selectedImage[i] = true;
+                                                isSelect = true;
+                                                selectIndex = i;
                                               }
                                             });
                                           },
@@ -284,35 +297,143 @@ class _ChatScreenState extends State<ChatScreen> {
                                               Align(
                                                 alignment: Alignment.center,
                                                 child: selectedImage[i]
-                                                    ? const Text('selected')
-                                                    : const Text('unselected'),
+                                                    ? Container(
+                                                        height: 23,
+                                                        width: 23,
+                                                        decoration:
+                                                            const BoxDecoration(
+                                                          shape:
+                                                              BoxShape.circle,
+                                                          color: Colors
+                                                              .lightBlueAccent,
+                                                        ),
+                                                        child: const Center(
+                                                          child: Text(
+                                                            '✓',
+                                                            style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      )
+                                                    : const Text(''),
                                               ),
                                             ],
                                           ),
                                         ),
                                       );
                                     }
-                                    return ScrollConfiguration(
-                                      behavior: MyBehavior(),
-                                      child: SizedBox(
-                                        height: 150,
-                                        child: GridView.count(
-                                          scrollDirection: Axis.vertical,
-                                          shrinkWrap: true,
-                                          primary: false,
-                                          padding: const EdgeInsets.all(20),
-                                          crossAxisSpacing: 4,
-                                          mainAxisSpacing: 4,
-                                          crossAxisCount: 3,
-                                          children: listImages,
-                                        ),
+                                    return SizedBox(
+                                      height: 160,
+                                      child: Stack(
+                                        children: [
+                                          ScrollConfiguration(
+                                            behavior: MyBehavior(),
+                                            child: SizedBox(
+                                              height: 160,
+                                              child: GridView.count(
+                                                scrollDirection: Axis.vertical,
+                                                shrinkWrap: true,
+                                                primary: false,
+                                                padding:
+                                                    const EdgeInsets.all(20),
+                                                crossAxisSpacing: 4,
+                                                mainAxisSpacing: 4,
+                                                crossAxisCount: 3,
+                                                children: listImages,
+                                              ),
+                                            ),
+                                          ),
+                                          isSelect
+                                              ? Align(
+                                                  alignment:
+                                                      Alignment.bottomCenter,
+                                                  child: GestureDetector(
+                                                    onTap: () async {
+                                                      String date =
+                                                          DateTime.now()
+                                                              .toString();
+                                                      String fileName =
+                                                          listImagePath[
+                                                                  selectIndex]
+                                                              .toString()
+                                                              .split('/')
+                                                              .last
+                                                              .replaceAll(
+                                                                  '\'', '');
+
+                                                      String completePath =
+                                                          getCompletePath(
+                                                              listImagePath[
+                                                                      selectIndex]
+                                                                  .toString());
+
+                                                      setState(() {
+                                                        isSelect = false;
+                                                        isGallery = false;
+                                                        selectedImage[
+                                                                selectIndex] =
+                                                            false;
+                                                      });
+
+                                                      await firebaseStorage
+                                                          .ref()
+                                                          .child(
+                                                              'images/$documentID/$date$fileName')
+                                                          .putFile(File(
+                                                              completePath));
+
+                                                      firebaseFirestore
+                                                          .collection('chats')
+                                                          .doc(documentID)
+                                                          .collection('message')
+                                                          .doc()
+                                                          .set(ChatMessageConstructor(
+                                                                  messageText:
+                                                                      '$documentID/$date$fileName',
+                                                                  sentBy: id,
+                                                                  sentAt: DateTime
+                                                                          .now()
+                                                                      .toString(),
+                                                                  isSeen: false)
+                                                              .toMap());
+                                                    },
+                                                    child: Container(
+                                                      padding: const EdgeInsets
+                                                              .symmetric(
+                                                          vertical: 10,
+                                                          horizontal: 50),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors
+                                                            .lightBlueAccent,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(12),
+                                                      ),
+                                                      child: const Text(
+                                                        'Send',
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                )
+                                              : Container(),
+                                        ],
                                       ),
                                     );
                                   },
                                 );
                               } else {
                                 return const SizedBox(
-                                    height: 150,
+                                    height: 160,
                                     child: Center(child: Loading()));
                               }
                             },
@@ -413,5 +534,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<List<String>> getPath() {
     return ExternalPath.getExternalStorageDirectories();
+  }
+
+  String getCompletePath(String path) {
+    return path.split(' ').last.replaceAll('\'', '').substring(1);
   }
 }

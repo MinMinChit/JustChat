@@ -71,58 +71,7 @@ class _ChatListScreenState extends State<ChatListScreen>
           String data = snapshot.data['profile'].toString();
           return Scaffold(
             backgroundColor: kBgColor,
-            appBar: AppBar(
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  FutureBuilder(
-                    future: ref.child('profile/$data').getDownloadURL(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<dynamic> snapshot) {
-                      if (snapshot.hasData) {
-                        return Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: NetworkImage(snapshot.data),
-                              fit: BoxFit.cover,
-                            ),
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(50)),
-                          ),
-                        );
-                      } else {
-                        return Container(
-                          width: 40,
-                          height: 40,
-                          decoration: const BoxDecoration(
-                            image: DecorationImage(
-                              image:
-                                  AssetImage('assets/images/offline_image.png'),
-                              fit: BoxFit.cover,
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(50)),
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                  Text(
-                    appbarText(index),
-                    style: const TextStyle(
-                      color: Colors.black,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 30,
-                    child: appbarIcon(index),
-                  ),
-                ],
-              ),
-              backgroundColor: kBgColor,
-              elevation: 0.2,
-            ),
+            appBar: buildAppBar(data),
             floatingActionButton: visibleFloatingButton
                 ? FloatingActionButton(
                     onPressed: () {
@@ -190,6 +139,58 @@ class _ChatListScreenState extends State<ChatListScreen>
           );
         }
       },
+    );
+  }
+
+  AppBar buildAppBar(String data) {
+    return AppBar(
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          FutureBuilder(
+            future: ref.child('profile/$data').getDownloadURL(),
+            builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+              if (snapshot.hasData) {
+                return Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage(snapshot.data),
+                      fit: BoxFit.cover,
+                    ),
+                    borderRadius: const BorderRadius.all(Radius.circular(50)),
+                  ),
+                );
+              } else {
+                return Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/offline_image.png'),
+                      fit: BoxFit.cover,
+                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(50)),
+                  ),
+                );
+              }
+            },
+          ),
+          Text(
+            appbarText(index),
+            style: const TextStyle(
+              color: Colors.black,
+            ),
+          ),
+          SizedBox(
+            height: 30,
+            child: appbarIcon(index),
+          ),
+        ],
+      ),
+      backgroundColor: kBgColor,
+      elevation: 0.2,
     );
   }
 
